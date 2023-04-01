@@ -2,7 +2,6 @@ name: Release
 concurrency: ci-${{ github.ref }}
 on:
   [workflow_dispatch]
-  on:
   push:
     branches:
       - 1.*.*

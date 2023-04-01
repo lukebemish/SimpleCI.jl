@@ -97,6 +97,7 @@ function StructTypes.construct(::Type{Config}, steps, filter)
 end
 
 function main(; configpath = "config.hrse")
+    cd(Env["GITHUB_WORKSPACE"])
     out = read(`git log -1 --pretty=%B`, String)
     config = open(joinpath(".simpleci.jl/", configpath)) do file
         readhrse(file, type = Config)

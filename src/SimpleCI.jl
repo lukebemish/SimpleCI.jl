@@ -62,7 +62,7 @@ struct TagVersionStep <: Step
 end
 
 function StructTypes.construct(::Type{TagVersionStep}, type, name, ignoreexisting)
-    TagVersionStep(type, name, something(ignoreexisting, false))
+    TagVersionStep(type, name, something(ignoreexisting, true))
 end
 StructTypes.StructType(::Type{TagVersionStep}) = StructTypes.Struct()
 
@@ -97,7 +97,7 @@ function StructTypes.construct(::Type{Config}, steps, filter)
 end
 
 function main(; configpath = "config.hrse")
-    cd(Env["GITHUB_WORKSPACE"])
+    cd(ENV["GITHUB_WORKSPACE"])
     out = read(`git log -1 --pretty=%B`, String)
     config = open(joinpath(".simpleci.jl/", configpath)) do file
         readhrse(file, type = Config)

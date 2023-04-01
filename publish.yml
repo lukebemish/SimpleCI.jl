@@ -2,9 +2,6 @@ name: Release
 concurrency: ci-${{ github.ref }}
 on:
   [workflow_dispatch]
-  push:
-    branches:
-      - 1.*.*
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -27,6 +24,9 @@ jobs:
           version: '1'
           arch: ${{ runner.arch }}
         if: steps.julia_in_path.outcome != 'success'
+      - uses: julia-actions/cache@v1
+        with:
+          cache-registries: "true"
       - name: "Add the General registry via Git"
         run: |
           import Pkg

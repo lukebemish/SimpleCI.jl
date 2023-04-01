@@ -6,6 +6,7 @@ import StructTypes: StructType
 
 mutable struct Env
     version::Union{Nothing, String}
+    javahome::Union{Nothing, String}
 end
 
 abstract type Step end
@@ -17,10 +18,11 @@ struct GradleStep <: Step
     name::String
     tasks::Vector{String}
     workingdir::String
+    setversion::Bool
 end
 
-function StructTypes.construct(::Type{GradleStep}, type, name, tasks, workingdir)
-    GradleStep(type, name, tasks, something(workingdir, "."))
+function StructTypes.construct(::Type{GradleStep}, type, name, tasks, workingdir, setversion)
+    GradleStep(type, name, tasks, something(workingdir, "."), something(setversion, false))
 end
 StructTypes.StructType(::Type{GradleStep}) = StructTypes.Struct()
 
@@ -30,10 +32,31 @@ workingdir(x::GradleStep) = x.workingdir
 buildRegex = r"teamcity\[buildNumber \'(.*?)\']"
 
 function runstep(step::GradleStep, env::Env)
-    out = read(setenv(`./gradlew $(join(step.tasks, ' '))`, ("TEAMCITY_VERSION"=>"<fake-teamcity>",)), String)
-    v = match(buildRegex, out)
-    if v !== nothing
-        env.version = v[1]
+    println("Local java is $(strip(read(pipeline(`java -version`, stderr = head, stdout = head), String)))")
+    javahome = if env.javahome === nothing || isempty(env.javahome)
+        ""
+    else
+        " -Dorg.gradle.java.home=$(env.javahome)"
+    end
+    gradleCmd = setenv(`./gradlew $(join(step.tasks, ' '))$(javahome)`, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
+    if step.setversion
+        buf = IOBuffer()
+        process = run(pipeline(gradleCmd, stdout = buf, stderr = stderr), wait=false)
+        pos = 1
+        while process_running(process)
+            sleep(0.1)
+            seek(buf, pos)
+            new = read(buf, String)
+            print(new)
+            pos += sizeof(new)
+        end
+        out = read(buf, String)
+        v = match(buildRegex, out)
+        if v !== nothing
+            env.version = v[1]
+        end
+    else
+        run(gradleCmd)
     end
 end
 
@@ -96,7 +119,7 @@ function StructTypes.construct(::Type{Config}, steps, filter)
     Config(steps, something(filter, "(?i)^\\[no-?_?ci"))
 end
 
-function main(; configpath = "config.hrse")
+function main(; configpath = "config.hrse", javahome = ENV["JAVA_HOME"])
     cd(ENV["GITHUB_WORKSPACE"])
     out = read(`git log -1 --pretty=%B`, String)
     config = open(joinpath(".simpleci.jl/", configpath)) do file
@@ -107,7 +130,7 @@ function main(; configpath = "config.hrse")
         return
     end
     rootdir = pwd()
-    env = Env(nothing)
+    env = Env(nothing, javahome)
     for step in config.steps
         println("Running step $(name(step))...")
         cd(joinpath(rootdir, workingdir(step)))

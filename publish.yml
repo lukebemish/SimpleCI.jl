@@ -31,15 +31,12 @@ jobs:
       - name: "Install SimpleCI"
         run: |
           import Pkg
-          name = "CompatHelper"
-          uuid = "aa819f21-2bde-4658-8897-bab36330d9b7"
-          version = "3"
-          Pkg.add(; name, uuid, version)
+          Pkg.add(url="https://github.com/lukebemish/SimpleCI.jl", rev="main")
         shell: julia --color=yes {0}
-      - name: "Run CompatHelper"
+      - name: "Run SimpleCI"
         run: |
-          import CompatHelper
-          CompatHelper.main()
+          import SimpleCI
+          SimpleCI.main()
         shell: julia --color=yes {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

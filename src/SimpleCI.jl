@@ -98,7 +98,9 @@ end
 
 function main(; configpath = "config.hrse")
     out = read(`git log -1 --pretty=%B`, String)
-    config = readhrse(joinpath(".simpleci.jl/", configpath), type = Config)
+    config = open(joinpath(".simpleci.jl/", configpath)) do file
+        readhrse(file, type = Config)
+    end
     if match(Regex(config.filter), strip(out)) !== nothing
         println("Skipping no-ci commit.")
         return

@@ -1,5 +1,11 @@
 name: Release
-on: [workflow_dispatch] # Manual trigger
+concurrency: ci-${{ github.ref }}
+on:
+  [workflow_dispatch]
+  on:
+  push:
+    branches:
+      - 1.*.*
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -40,6 +46,3 @@ jobs:
         shell: julia --color=yes {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAVEN_URL: ${{ secrets.MAVEN_URL }}
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}

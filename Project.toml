@@ -1,0 +1,8 @@
+name = "SimpleCI"
+uuid = "8d78c5c8-d365-4071-93c3-755df6a7f42d"
+authors = ["Luke Bemish <lukebemish@lukebemish.dev>"]
+version = "0.1.0"
+
+[deps]
+HumanReadableSExpressions = "dfa09964-7899-4f24-b5ee-10dc563fda7c"
+StructTypes = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"

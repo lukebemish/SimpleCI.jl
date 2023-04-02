@@ -5,4 +5,5 @@ version = "0.1.0"
 
 [deps]
 HumanReadableSExpressions = "dfa09964-7899-4f24-b5ee-10dc563fda7c"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 StructTypes = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"

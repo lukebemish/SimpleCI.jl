@@ -3,6 +3,7 @@ module SimpleCI
 using HumanReadableSExpressions
 using StructTypes
 import StructTypes: StructType
+import JSON3
 
 mutable struct Env
     version::Union{Nothing, String}
@@ -129,10 +130,16 @@ function StructTypes.construct(::Type{Config}, steps, filter)
 end
 
 function main(; configpath = "config.hrse", javahome = if haskey(ENV,"JAVA_HOME") ENV["JAVA_HOME"] else nothing end)
-    cd(ENV["GITHUB_WORKSPACE"])
+    if haskey(ENV, "GITHUB_WORKSPACE")
+        cd(ENV["GITHUB_WORKSPACE"])
+    end
     out = read(`git log -1 --pretty=%B`, String)
     config = open(joinpath(".simpleci.jl/", configpath)) do file
-        readhrse(file, type = Config)
+        if endswith(configpath, ".json")
+            JSON3.read(file, Config)
+        else
+            readhrse(file, type = Config)
+        end
     end
     if match(Regex(config.filter), strip(out)) !== nothing
         println("Skipping no-ci commit.")

@@ -37,6 +37,7 @@ function runstep(step::GradleStep, env::Env)
     javahome = if env.javahome === nothing || isempty(env.javahome)
         ""
     else
+        println("Using java from $(env.javahome), version $(strip(read(pipeline(`$(env.javahome)/bin/java -version`, stderr = head, stdout = head), String)))")
         " -Dorg.gradle.java.home=$(env.javahome)"
     end
     gradleCmd = setenv(`./gradlew $(join(step.tasks, ' '))$(javahome)`, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
@@ -50,6 +51,9 @@ function runstep(step::GradleStep, env::Env)
             new = read(buf, String)
             print(new)
             pos += sizeof(new)
+        end
+        if !success(process)
+            error("Gradle failed.")
         end
         out = read(buf, String)
         v = match(buildRegex, out)

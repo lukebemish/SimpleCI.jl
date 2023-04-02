@@ -34,15 +34,15 @@ buildRegex = r"teamcity\[buildNumber \'(.*?)\']"
 function runstep(step::GradleStep, env::Env)
     head = `head -n 1`
     println("Local java is $(strip(read(pipeline(`java -version`, stderr = head, stdout = head), String)))")
-    javahome = if env.javahome === nothing || isempty(env.javahome)
-        ""
+    args = []
+    if env.javahome === nothing || isempty(env.javahome)
     else
         println("Using java from $(env.javahome), version $(strip(read(pipeline(`$(env.javahome)/bin/java -version`, stderr = head, stdout = head), String)))")
-        " -Dorg.gradle.java.home=$(env.javahome)"
+        push!(args, "-Dorg.gradle.java.home=$(env.javahome)")
     end
     println("Running gradle wrapper with tasks [$(join(step.tasks, ", "))]")
     run(`./gradlew -v`)
-    toRun = `./gradlew $(join(step.tasks, ' '))$(javahome)`
+    toRun = `./gradlew $(step.tasks) $(args)`
     println("Running $(toRun)")
     gradleCmd = setenv(toRun, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
     if step.setversion

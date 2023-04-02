@@ -32,6 +32,7 @@ workingdir(x::GradleStep) = x.workingdir
 buildRegex = r"teamcity\[buildNumber \'(.*?)\']"
 
 function runstep(step::GradleStep, env::Env)
+    head = `head -n 1`
     println("Local java is $(strip(read(pipeline(`java -version`, stderr = head, stdout = head), String)))")
     javahome = if env.javahome === nothing || isempty(env.javahome)
         ""

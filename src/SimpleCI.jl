@@ -8,7 +8,10 @@ import JSON3
 mutable struct Env
     version::Union{Nothing, String}
     javahome::Union{Nothing, String}
+    lastlog::Union{Nothing, String}
 end
+
+Env() = Env(nothing, nothing, nothing)
 
 abstract type Step end
 StructTypes.StructType(::Type{Step}) = StructTypes.AbstractType()
@@ -61,9 +64,11 @@ function runstep(step::GradleStep, env::Env)
             error("Gradle failed.")
         end
         out = read(buf, String)
+        env.lastlog = out
         v = match(buildRegex, out)
         if v !== nothing
             env.version = v[1]
+            println("Found version $(env.version)")
         end
     else
         run(gradleCmd)
@@ -146,7 +151,8 @@ function main(; configpath = "config.hrse", javahome = if haskey(ENV,"JAVA_HOME"
         return
     end
     rootdir = pwd()
-    env = Env(nothing, javahome)
+    env = Env()
+    env.javahome = javahome
     for step in config.steps
         println("Running step $(name(step))...")
         cd(joinpath(rootdir, workingdir(step)))

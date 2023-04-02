@@ -40,6 +40,7 @@ function runstep(step::GradleStep, env::Env)
         println("Using java from $(env.javahome), version $(strip(read(pipeline(`$(env.javahome)/bin/java -version`, stderr = head, stdout = head), String)))")
         " -Dorg.gradle.java.home=$(env.javahome)"
     end
+    println("Running gradle wrapper $(strip(read(`./gradlew -v`, String))) with tasks [$(join(step.tasks, ", "))]")
     gradleCmd = setenv(`./gradlew $(join(step.tasks, ' '))$(javahome)`, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
     if step.setversion
         buf = IOBuffer()

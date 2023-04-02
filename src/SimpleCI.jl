@@ -42,9 +42,9 @@ function runstep(step::GradleStep, env::Env)
     end
     println("Running gradle wrapper with tasks [$(join(step.tasks, ", "))]")
     run(`./gradlew -v`)
-    toRun = "./gradlew $(join(step.tasks, ' '))$(javahome)"
+    toRun = ``./gradlew $(join(step.tasks, ' '))$(javahome)``
     println("Running $(toRun)")
-    gradleCmd = setenv(`$(toRun)`, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
+    gradleCmd = setenv(toRun, ("TEAMCITY_VERSION"=>"<fake-teamcity>",))
     if step.setversion
         buf = IOBuffer()
         process = run(pipeline(gradleCmd, stdout = buf, stderr = stderr), wait=false)

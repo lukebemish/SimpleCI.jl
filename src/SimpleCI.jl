@@ -128,7 +128,7 @@ function StructTypes.construct(::Type{Config}, steps, filter)
     Config(steps, something(filter, "(?i)^\\[no-?_?ci"))
 end
 
-function main(; configpath = "config.hrse", javahome = ENV["JAVA_HOME"])
+function main(; configpath = "config.hrse", javahome = if haskey(ENV,"JAVA_HOME") ENV["JAVA_HOME"] else nothing end)
     cd(ENV["GITHUB_WORKSPACE"])
     out = read(`git log -1 --pretty=%B`, String)
     config = open(joinpath(".simpleci.jl/", configpath)) do file

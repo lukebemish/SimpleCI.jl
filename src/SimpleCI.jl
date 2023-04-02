@@ -8,10 +8,9 @@ import JSON3
 mutable struct Env
     version::Union{Nothing, String}
     javahome::Union{Nothing, String}
-    lastlog::Union{Nothing, String}
 end
 
-Env() = Env(nothing, nothing, nothing)
+Env() = Env(nothing, nothing)
 
 abstract type Step end
 StructTypes.StructType(::Type{Step}) = StructTypes.AbstractType()
@@ -63,8 +62,8 @@ function runstep(step::GradleStep, env::Env)
         if !success(process)
             error("Gradle failed.")
         end
+        seek(buf, 0)
         out = read(buf, String)
-        env.lastlog = out
         v = match(buildRegex, out)
         if v !== nothing
             env.version = v[1]
